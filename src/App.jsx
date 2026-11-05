@@ -8,7 +8,7 @@ import About from './components/About'
 import TechnicalSkills from './components/TechnicalSkills'
 import Process from './components/Process'
 import Projects from './components/Projects'
-import Experience from './components/Experience'
+import Internships from './components/Internships'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 
@@ -30,7 +30,7 @@ export default function App() {
         <TechnicalSkills />
         <Process />
         <Projects />
-        <Experience />
+        <Internships />
         <Contact />
       </main>
       <Footer />
