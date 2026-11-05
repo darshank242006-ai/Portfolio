@@ -1,98 +1,125 @@
-import { useState } from 'react'
-import { personalInfo, heroContent } from '../data/portfolioData'
+import { useState, useEffect } from 'react'
+import personalInfo from '../data/portfolioData'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
 
-  const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'About', href: '#about' },
-    { name: 'Skills', href: '#skills' },
-    { name: 'Process', href: '#process' },
-    { name: 'Projects', href: '#projects' },
-    { name: 'Contact', href: '#contact' },
-  ]
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const navLinks = ['Home', 'About', 'Skills', 'Projects', 'Contact']
+
+  const hireMeMailto = `mailto:${personalInfo.emails.primary}?subject=Hiring Inquiry – Portfolio&body=Hello ${personalInfo.name},%0D%0A%0D%0AI came across your portfolio and would like to discuss an opportunity with you.%0D%0A%0D%0ALooking forward to hearing from you.%0D%0ABest Regards,`
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/85 border-b border-white/10 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        {/* Brand Name */}
-        <a
-          href="#home"
-          className="text-2xl font-black tracking-tight text-white hover:text-[#ff2a2a] transition-colors flex items-center gap-2"
-        >
-          <span className="w-3 h-3 rounded-full bg-[#ff2a2a] inline-block animate-pulse"></span>
+    <nav
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+        isOpen
+          ? 'bg-[#ff2a2a] py-4'
+          : isScrolled
+          ? 'bg-transparent backdrop-blur-md py-4'
+          : 'bg-transparent py-6'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
+        {/* Left Logo */}
+        <a href="#" className="text-white text-2xl font-black">
           {personalInfo.brandName}
+          <span className="text-[#ff2a2a]">.</span>
         </a>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-8">
+        {/* Centre Desktop Links with Animated Underline */}
+        <div className="hidden md:flex space-x-8">
           {navLinks.map((link) => (
             <a
-              key={link.name}
-              href={link.href}
-              className="text-sm font-medium text-zinc-300 hover:text-[#ff2a2a] transition-colors"
+              key={link}
+              href={`#${link.toLowerCase()}`}
+              className="group relative text-white/80 hover:text-white font-medium transition-colors"
             >
-              {link.name}
+              {link}
+              <span className="absolute -bottom-1 left-0 h-0.5 bg-red-500 w-0 group-hover:w-full transition-all duration-300" />
             </a>
           ))}
-        </nav>
+        </div>
 
-        {/* Desktop Resume CTA */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* Right Desktop Pill Button */}
+        <div className="hidden md:block">
           <a
-            href={heroContent.ctaResume.href}
-            download
-            className="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-transparent text-white border border-white/20 hover:border-[#ff2a2a] hover:bg-[#ff2a2a] hover:text-white transition-all duration-300"
+            href={hireMeMailto}
+            className="px-6 py-2.5 rounded-full bg-white/10 border border-white/20 text-white font-semibold backdrop-blur-md hover:bg-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300"
           >
-            {heroContent.ctaResume.text}
+            Hire Me
           </a>
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Hamburger Button */}
         <div className="md:hidden flex items-center">
           <button
-            onClick={() => setIsOpen(!isOpen)}
             type="button"
-            className="text-zinc-300 hover:text-white focus:outline-none p-2"
-            aria-label="Toggle Navigation Menu"
+            onClick={() => setIsOpen(!isOpen)}
+            className="text-white focus:outline-none p-2"
+            aria-label="Toggle navigation menu"
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
               {isOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               )}
             </svg>
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
-      {isOpen && (
-        <div className="md:hidden bg-zinc-950 border-b border-white/10 px-4 pt-3 pb-6 space-y-3">
+      {/* Mobile Animated Dropdown */}
+      <div
+        className={`md:hidden absolute top-full left-0 w-full bg-[#ff2a2a] shadow-2xl overflow-hidden transition-all duration-300 ${
+          isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="px-6 py-4 flex flex-col space-y-3">
           {navLinks.map((link) => (
             <a
-              key={link.name}
-              href={link.href}
+              key={link}
+              href={`#${link.toLowerCase()}`}
               onClick={() => setIsOpen(false)}
-              className="block text-base font-medium text-zinc-300 hover:text-[#ff2a2a] py-2 transition-colors"
+              className="text-white font-bold text-lg border-b border-white/20 pb-2 hover:text-black transition-colors"
             >
-              {link.name}
+              {link}
             </a>
           ))}
           <div className="pt-2">
             <a
-              href={heroContent.ctaResume.href}
-              download
+              href={hireMeMailto}
               onClick={() => setIsOpen(false)}
-              className="block text-center py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#ff2a2a] text-white hover:bg-[#e02020] transition-colors"
+              className="block w-full text-center py-3 rounded-full bg-white text-[#ff2a2a] font-bold text-base hover:bg-zinc-100 transition-colors shadow-md"
             >
-              {heroContent.ctaResume.text}
+              Hire Me
             </a>
           </div>
         </div>
-      )}
-    </header>
+      </div>
+    </nav>
   )
 }
