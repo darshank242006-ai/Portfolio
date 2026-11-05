@@ -10,6 +10,7 @@ import TechnicalSkills from './components/TechnicalSkills'
 import Services from './components/Services'
 import Projects from './components/Projects'
 import Internships from './components/Internships'
+import SoftSkills from './components/SoftSkills'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 
@@ -33,6 +34,7 @@ export default function App() {
         <Services />
         <Projects />
         <Internships />
+        <SoftSkills />
         <Contact />
       </main>
       <Footer />

@@ -1,248 +1,253 @@
-import { useState } from 'react'
-import emailjs from '@emailjs/browser'
-import { personalInfo, socialLinks, emailjsConfig } from '../data/portfolioData'
+import { useRef, useState } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
+import {
+  emailjsConfig,
+  personalInfo,
+  socialLinks,
+} from '../data/portfolioData'
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-  })
-  const [status, setStatus] = useState({
-    submitting: false,
-    submitted: false,
-    error: null,
+  const ref = useRef(null)
+  const formRef = useRef(null)
+  const [status, setStatus] = useState('idle') // 'idle' | 'sending' | 'success' | 'error'
+
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start'],
   })
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-  }
+  const y = useTransform(scrollYProgress, [0, 1], ['-20%', '30%'])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setStatus({ submitting: true, submitted: false, error: null })
+    if (status === 'sending') return
 
-    // Check if valid EmailJS credentials are configured
-    const hasValidEmailJS =
-      emailjsConfig.serviceId &&
-      emailjsConfig.serviceId !== 'YOUR_EMAILJS_SERVICE_ID' &&
-      emailjsConfig.templateId &&
-      emailjsConfig.templateId !== 'YOUR_EMAILJS_TEMPLATE_ID' &&
-      emailjsConfig.publicKey &&
-      emailjsConfig.publicKey !== 'YOUR_EMAILJS_PUBLIC_KEY'
+    setStatus('sending')
 
-    if (hasValidEmailJS) {
+    const firstName = formRef.current?.querySelector('#firstName')?.value.trim() || ''
+    const lastName = formRef.current?.querySelector('#lastName')?.value.trim() || ''
+    const email = formRef.current?.querySelector('#email')?.value.trim() || ''
+    const message = formRef.current?.querySelector('#message')?.value.trim() || ''
+
+    if (!firstName || !email || !message) {
+      setStatus('error')
+      setTimeout(() => setStatus('idle'), 3000)
+      return
+    }
+
+    const { serviceId, templateId, publicKey } = emailjsConfig
+    const isConfigured =
+      Boolean(serviceId && templateId && publicKey) &&
+      serviceId !== 'YOUR_EMAILJS_SERVICE_ID' &&
+      templateId !== 'YOUR_EMAILJS_TEMPLATE_ID' &&
+      publicKey !== 'YOUR_EMAILJS_PUBLIC_KEY'
+
+    if (!isConfigured) {
+      window.open(
+        `mailto:${personalInfo.emails.primary}?subject=Portfolio Contact from ${firstName} ${lastName}&body=${encodeURIComponent(
+          `From: ${firstName} ${lastName}\nEmail: ${email}\n\n${message}`,
+        )}`,
+        '_blank',
+      )
+      setStatus('success')
+      formRef.current?.reset()
+      setTimeout(() => setStatus('idle'), 3000)
+    } else {
       try {
-        await emailjs.send(
-          emailjsConfig.serviceId,
-          emailjsConfig.templateId,
-          {
-            from_name: formData.name,
-            from_email: formData.email,
-            subject: formData.subject,
-            message: formData.message,
-            to_name: personalInfo.name,
-          },
-          emailjsConfig.publicKey,
-        )
-        setStatus({ submitting: false, submitted: true, error: null })
-        setFormData({ name: '', email: '', subject: '', message: '' })
+        const emailjs = await import('@emailjs/browser')
+        await emailjs.sendForm(serviceId, templateId, formRef.current, publicKey)
+        setStatus('success')
+        formRef.current?.reset()
       } catch (err) {
         console.error('EmailJS error:', err)
-        setStatus({
-          submitting: false,
-          submitted: false,
-          error: 'Failed to send message via EmailJS. Please reach out directly via email.',
-        })
+        setStatus('error')
       }
-    } else {
-      // Direct mailto fallback
-      const mailtoUrl = `mailto:${personalInfo.emails.primary}?subject=${encodeURIComponent(
-        formData.subject || 'Portfolio Inquiry',
-      )}&body=${encodeURIComponent(
-        `From: ${formData.name} (${formData.email})\n\n${formData.message}`,
-      )}`
-      window.location.href = mailtoUrl
-      setStatus({ submitting: false, submitted: true, error: null })
+      setTimeout(() => setStatus('idle'), 4000)
     }
   }
 
   return (
-    <section id="contact" className="py-24 px-4 sm:px-6 lg:px-8 bg-white text-zinc-950">
-      <div className="max-w-6xl mx-auto">
-        {/* Section Header */}
-        <div data-aos="fade-up" className="max-w-2xl mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#ff2a2a] block mb-2">
-            Get In Touch
-          </span>
-          <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-zinc-950 uppercase mb-4">
-            Let's Connect
-          </h2>
-          <p className="text-zinc-600 text-sm sm:text-base">
-            Have a question, job opportunity, or collaboration idea? Feel free to reach out anytime.
-          </p>
+    <section
+      ref={ref}
+      id="contact"
+      className="bg-[#0a0a0a] w-full min-h-screen relative overflow-hidden flex items-end pt-32 border-t border-gray-900"
+    >
+      {/* Behind: Giant Parallax "Contact" Word */}
+      <motion.div
+        style={{ y }}
+        className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden"
+      >
+        <div
+          className="text-[25vw] leading-[0.75] font-black uppercase tracking-tighter select-none scale-y-[1.6] origin-top text-white/[0.04]"
+          style={{ fontFamily: "'Impact', 'Arial Black', sans-serif" }}
+        >
+          Contact
         </div>
+      </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          {/* Contact Details */}
-          <div data-aos="fade-up" className="lg:col-span-5 space-y-6">
-            <div className="p-6 rounded-2xl bg-zinc-50 border border-zinc-200">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
-                Email Address
-              </span>
-              <a
-                href={`mailto:${personalInfo.emails.primary}`}
-                className="text-base font-bold text-zinc-900 hover:text-[#ff2a2a] transition-colors break-all"
-              >
-                {personalInfo.emails.primary}
-              </a>
-            </div>
+      {/* In front: Red Contact Card aligned to the right */}
+      <div className="w-full relative z-10 flex justify-end">
+        <div
+          data-aos="fade-up"
+          className="bg-[#ff2a2a] w-full md:w-[85%] lg:w-[75%] p-8 md:p-16 rounded-tl-3xl shadow-2xl"
+        >
+          {/* Header Row */}
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-12">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-white">
+              Reach Me
+            </span>
+            <a
+              href={socialLinks.instagram || 'https://instagram.com'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-black/20 hover:bg-black/30 text-white border border-white/20 transition-all backdrop-blur-sm"
+            >
+              DM on Instagram ↗
+            </a>
+          </div>
 
-            <div className="p-6 rounded-2xl bg-zinc-50 border border-zinc-200">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
-                Phone Number
-              </span>
-              <a
-                href={`tel:${personalInfo.phone}`}
-                className="text-base font-bold text-zinc-900 hover:text-[#ff2a2a] transition-colors"
-              >
-                {personalInfo.phone}
-              </a>
-            </div>
+          {/* Form */}
+          <form
+            ref={formRef}
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-12"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+              {/* Left Column: Underline-only inputs */}
+              <div className="space-y-8">
+                <div>
+                  <input
+                    id="firstName"
+                    name="first_name"
+                    type="text"
+                    required
+                    placeholder="First Name *"
+                    className="w-full bg-transparent border-b border-white/40 pb-3 text-lg text-white placeholder-white focus:border-white focus:outline-none transition-colors"
+                  />
+                </div>
 
-            <div className="p-6 rounded-2xl bg-zinc-50 border border-zinc-200">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
-                Location
-              </span>
-              <p className="text-base font-bold text-zinc-900">
-                {personalInfo.location}
-              </p>
-            </div>
+                <div>
+                  <input
+                    id="lastName"
+                    name="last_name"
+                    type="text"
+                    placeholder="Last Name"
+                    className="w-full bg-transparent border-b border-white/40 pb-3 text-lg text-white placeholder-white focus:border-white focus:outline-none transition-colors"
+                  />
+                </div>
 
-            <div className="p-6 rounded-2xl bg-zinc-50 border border-zinc-200">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-2">
-                Social Profiles
-              </span>
-              <div className="flex flex-wrap gap-4 text-sm font-bold text-zinc-900">
-                <a
-                  href={socialLinks.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-[#ff2a2a] transition-colors flex items-center gap-1"
-                >
-                  <span>GitHub</span>
-                  <span className="text-xs text-[#ff2a2a]">↗</span>
-                </a>
-                <a
-                  href={socialLinks.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-[#ff2a2a] transition-colors flex items-center gap-1"
-                >
-                  <span>LinkedIn</span>
-                  <span className="text-xs text-[#ff2a2a]">↗</span>
-                </a>
+                <div>
+                  <input
+                    id="email"
+                    name="user_email"
+                    type="email"
+                    required
+                    placeholder="Email Address *"
+                    className="w-full bg-transparent border-b border-white/40 pb-3 text-lg text-white placeholder-white focus:border-white focus:outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Right Column: Textarea */}
+              <div className="flex flex-col">
+                <textarea
+                  id="message"
+                  name="message"
+                  required
+                  placeholder="Your Message *"
+                  rows={5}
+                  className="w-full bg-transparent border-b border-white/40 pb-3 text-lg text-white placeholder-white focus:border-white focus:outline-none transition-colors resize-none min-h-[120px] flex-1"
+                />
               </div>
             </div>
-          </div>
 
-          {/* Contact Form */}
-          <div data-aos="fade-up" data-aos-delay="150" className="lg:col-span-7">
-            <div className="p-8 sm:p-10 rounded-3xl bg-zinc-50 border border-zinc-200 shadow-sm">
-              <h3 className="text-xl font-bold text-zinc-900 mb-6">
-                Send a Direct Message
-              </h3>
+            {/* Bottom Section */}
+            <div className="space-y-6 pt-4 border-t border-white/20">
+              {/* Permission Checkbox */}
+              <label className="flex items-center gap-3 text-xs md:text-sm text-white/90 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  defaultChecked
+                  required
+                  className="w-4 h-4 rounded border-white/50 text-black focus:ring-0 accent-black cursor-pointer"
+                />
+                <span>
+                  I consent to having this website store my submitted information
+                  so they can respond to my inquiry.
+                </span>
+              </label>
 
-              {status.submitted && (
-                <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
-                  Thank you! Your message inquiry has been triggered. I will get back to you shortly.
-                </div>
-              )}
+              {/* Response Note */}
+              <p className="text-xs text-white/80">
+                Your message will be sent directly to my inbox. I typically
+                respond within 24-48 hours.
+              </p>
 
-              {status.error && (
-                <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-[#ff2a2a] text-sm">
-                  {status.error}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="name" className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider mb-1.5">
-                      Your Name
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      name="name"
-                      required
-                      value={formData.name}
-                      onChange={handleChange}
-                      placeholder="e.g. Alex Smith"
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-300 text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-[#ff2a2a] text-sm transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="email" className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider mb-1.5">
-                      Email Address
-                    </label>
-                    <input
-                      id="email"
-                      type="email"
-                      name="email"
-                      required
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="e.g. alex@example.com"
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-300 text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-[#ff2a2a] text-sm transition-colors"
-                    />
-                  </div>
+              {/* Urgent Email & Submit Button Row */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pt-2">
+                <div className="text-xs text-white/90">
+                  Need urgent response?{' '}
+                  <a
+                    href={`mailto:${personalInfo.emails.primary}?subject=Urgent Inquiry – Portfolio`}
+                    className="underline font-bold text-white hover:text-black transition-colors"
+                  >
+                    Send Direct Email ↗
+                  </a>
                 </div>
 
-                <div>
-                  <label htmlFor="subject" className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider mb-1.5">
-                    Subject
-                  </label>
-                  <input
-                    id="subject"
-                    type="text"
-                    name="subject"
-                    required
-                    value={formData.subject}
-                    onChange={handleChange}
-                    placeholder="e.g. Opportunity Inquiry"
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-300 text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-[#ff2a2a] text-sm transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="message" className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider mb-1.5">
-                    Message
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={4}
-                    required
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder="Write your message here..."
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-zinc-300 text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-[#ff2a2a] text-sm transition-colors resize-none"
-                  />
-                </div>
-
+                {/* Submit Pill Button */}
                 <button
                   type="submit"
-                  disabled={status.submitting}
-                  className="w-full py-4 rounded-xl text-sm font-bold uppercase tracking-wider bg-[#ff2a2a] text-white hover:bg-[#e02020] transition-colors shadow-md disabled:opacity-50"
+                  disabled={status === 'sending'}
+                  className={`group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow-xl border cursor-pointer ${
+                    status === 'sending'
+                      ? 'bg-gray-400/80 border-gray-400 text-gray-900 cursor-not-allowed'
+                      : status === 'success'
+                      ? 'bg-emerald-600 border-emerald-500 text-white'
+                      : status === 'error'
+                      ? 'bg-red-950 border-red-900 text-red-200'
+                      : 'bg-black/30 border-white/30 text-white hover:bg-white hover:text-[#ff2a2a] hover:border-white'
+                  }`}
                 >
-                  {status.submitting ? 'Sending...' : 'Send Message'}
+                  {status === 'sending' ? (
+                    <>
+                      <svg
+                        className="animate-spin w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v8H4z"
+                        />
+                      </svg>
+                      <span>Sending...</span>
+                    </>
+                  ) : status === 'success' ? (
+                    <span>Sent Successfully ✓</span>
+                  ) : status === 'error' ? (
+                    <span>Failed — Try Again</span>
+                  ) : (
+                    <>
+                      <span>Send Message</span>
+                      <span className="transition-transform duration-300 group-hover:translate-x-1">
+                        →
+                      </span>
+                    </>
+                  )}
                 </button>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </section>
