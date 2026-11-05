@@ -3,6 +3,7 @@ import AOS from 'aos'
 import 'aos/dist/aos.css'
 
 import Preloader from './components/Preloader'
+import SplashCursor from './components/SplashCursor'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
@@ -24,20 +25,29 @@ export default function App() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-[#ff2a2a] selection:text-white">
-      <Preloader />
-      <Navbar />
-      <main>
-        <Hero />
-        <About />
-        <TechnicalSkills />
-        <Services />
-        <Projects />
-        <Internships />
-        <SoftSkills />
-        <Contact />
-      </main>
-      <Footer />
-    </div>
+    <>
+      <SplashCursor
+        VELOCITY_DISSIPATION={3}
+        SPLAT_FORCE={3500}
+        COLOR_UPDATE_SPEED={18}
+        COLOR="#ffffff"
+        RAINBOW_MODE={false}
+      />
+      <div className="min-h-screen bg-black text-white font-sans selection:bg-[#ff2a2a] selection:text-white">
+        <Preloader />
+        <Navbar />
+        <main>
+          <Hero />
+          <About />
+          <TechnicalSkills />
+          <Services />
+          <Projects />
+          <Internships />
+          <SoftSkills />
+          <Contact />
+        </main>
+        <Footer />
+      </div>
+    </>
   )
 }
