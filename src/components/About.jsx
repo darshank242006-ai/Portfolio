@@ -78,7 +78,7 @@ export default function About() {
                   <div className="w-10 h-1.5 bg-gray-700 rounded-full mx-auto mb-2 shrink-0" />
                   <img
                     src={stackImage}
-                    alt={`${personalInfo.name} Portrait`}
+                    alt="Darshan K — Java Developer, TAP Academy student"
                     className="w-full h-full aspect-[3/4] rounded-xl object-cover object-top"
                   />
                 </div>
