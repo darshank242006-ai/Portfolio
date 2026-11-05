@@ -1,158 +1,265 @@
-import { heroContent, personalInfo, socialLinks, academy } from '../data/portfolioData'
-import profileImg from '../assets/about/profile.png'
+import { useRef, useEffect, useState } from 'react'
+import AOS from 'aos'
+import 'aos/dist/aos.css'
+
+import heroVideo from '../assets/hero/hero.mp4'
+import heroPoster from '../assets/about/profile.png'
+import { heroContent, socialLinks } from '../data/portfolioData'
 
 export default function Hero() {
+  const videoRef = useRef(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: true,
+      easing: 'ease-out',
+    })
+
+    const handleLoad = () => {
+      AOS.refresh()
+    }
+
+    window.addEventListener('load', handleLoad)
+    return () => window.removeEventListener('load', handleLoad)
+  }, [])
+
+  const toggleVideo = (e) => {
+    e.stopPropagation()
+    if (!videoRef.current) return
+
+    if (isPlaying) {
+      videoRef.current.pause()
+      setIsPlaying(false)
+    } else {
+      videoRef.current.play()
+      setIsPlaying(true)
+    }
+  }
+
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center pt-28 pb-16 px-4 sm:px-6 lg:px-8 bg-black overflow-hidden"
+      className="relative w-full h-screen overflow-hidden bg-[#ff2a2a]"
     >
-      {/* Background Subtle Gradient Glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#ff2a2a]/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Background Video */}
+      <video
+        ref={videoRef}
+        playsInline
+        poster={heroPoster}
+        onEnded={() => setIsPlaying(false)}
+        className="absolute inset-0 w-full h-full object-contain object-top md:object-right z-0"
+      >
+        <source src={heroVideo} type="video/mp4" />
+      </video>
 
-      <div className="max-w-6xl mx-auto w-full relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Column: Headline and CTAs */}
-          <div className="lg:col-span-7 text-center lg:text-left">
-            {/* Availability Badge */}
-            <div
-              data-aos="fade-down"
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-xs font-medium text-zinc-300 mb-6"
+      {/* Readability Gradient Overlay */}
+      <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-r from-black/45 via-black/10 to-transparent" />
+
+      {/* Left Floating Social Bar (Desktop) */}
+      <div className="hidden lg:flex fixed left-6 top-1/2 -translate-y-1/2 z-50 mix-blend-difference flex-col space-y-6">
+        {/* GitHub */}
+        <a
+          href={socialLinks.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="GitHub"
+          className="text-white/60 hover:text-white hover:scale-125 transition-all duration-300"
+        >
+          <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+            />
+          </svg>
+        </a>
+
+        {/* LinkedIn */}
+        <a
+          href={socialLinks.linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="LinkedIn"
+          className="text-white/60 hover:text-white hover:scale-125 transition-all duration-300"
+        >
+          <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+          </svg>
+        </a>
+
+        {/* Instagram */}
+        <a
+          href={socialLinks.instagram || 'https://instagram.com'}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Instagram"
+          className="text-white/60 hover:text-white hover:scale-125 transition-all duration-300"
+        >
+          <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+          </svg>
+        </a>
+      </div>
+
+      {/* Main Content Container */}
+      <div className="absolute inset-0 z-20 max-w-7xl mx-auto px-6 md:px-12 pb-20 md:pb-[8%] flex flex-col md:flex-row justify-end md:justify-between items-start md:items-end pointer-events-none">
+        {/* Left Block */}
+        <div className="max-w-2xl pointer-events-auto">
+          {/* Mobile Social Bar */}
+          <div
+            data-aos="fade-up"
+            data-aos-delay="100"
+            className="flex items-center space-x-5 mb-4 text-white/70 lg:hidden"
+          >
+            <a
+              href={socialLinks.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              className="hover:text-white transition-colors"
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Open to Java Developer Opportunities</span>
-              <span className="text-zinc-500">•</span>
-              <span className="text-zinc-400">{personalInfo.location}</span>
-            </div>
-
-            {/* Greeting */}
-            <h2
-              data-aos="fade-up"
-              data-aos-delay="100"
-              className="text-zinc-400 text-lg sm:text-xl font-medium mb-3 tracking-wide"
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                />
+              </svg>
+            </a>
+            <a
+              href={socialLinks.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn"
+              className="hover:text-white transition-colors"
             >
-              {heroContent.greeting}
-            </h2>
-
-            {/* Headline */}
-            <h1
-              data-aos="fade-up"
-              data-aos-delay="200"
-              className="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight uppercase leading-tight mb-6"
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+              </svg>
+            </a>
+            <a
+              href={socialLinks.instagram || 'https://instagram.com'}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="hover:text-white transition-colors"
             >
-              <span className="block text-white">Full-Stack</span>
-              <span className="block text-[#ff2a2a] drop-shadow-[0_0_35px_rgba(255,42,42,0.35)]">
-                {heroContent.titleHighlight}
-              </span>
-            </h1>
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+              </svg>
+            </a>
+          </div>
 
-            {/* Subtitle */}
-            <p
-              data-aos="fade-up"
-              data-aos-delay="300"
-              className="max-w-xl text-base sm:text-lg text-zinc-400 font-normal leading-relaxed mb-8 mx-auto lg:mx-0"
+          {/* Heading */}
+          <h1
+            data-aos="fade-up"
+            className="text-white text-3xl md:text-5xl font-bold mb-4 leading-tight"
+          >
+            {heroContent.greeting},{' '}
+            <br />
+            <span className="text-black font-extrabold">
+              {heroContent.titleHighlight}
+            </span>
+          </h1>
+
+          {/* Subtitle */}
+          <p
+            data-aos="fade-up"
+            data-aos-delay="200"
+            className="text-white text-sm md:text-lg font-semibold max-w-md mb-8 leading-relaxed"
+          >
+            {heroContent.subtitle}
+          </p>
+
+          {/* Action Buttons Row */}
+          <div
+            data-aos="fade-up"
+            data-aos-delay="400"
+            className="flex flex-wrap gap-4 items-center"
+          >
+            {/* Primary CTA */}
+            <a
+              href={heroContent.ctaPrimary.href}
+              className="bg-white text-black font-bold px-6 py-3 rounded-full hover:scale-105 transition-all shadow-lg text-xs md:text-sm uppercase tracking-wider"
             >
-              {heroContent.subtitle}
-            </p>
+              {heroContent.ctaPrimary.text}
+            </a>
 
-            {/* Call to Actions */}
-            <div
-              data-aos="fade-up"
-              data-aos-delay="400"
-              className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-10"
+            {/* Secondary CTA */}
+            <a
+              href={heroContent.ctaSecondary.href}
+              className="bg-black/40 text-white font-semibold px-6 py-3 rounded-full border border-white backdrop-blur hover:bg-black/60 transition-all text-xs md:text-sm uppercase tracking-wider"
             >
-              <a
-                href={heroContent.ctaPrimary.href}
-                className="px-7 py-3 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider bg-[#ff2a2a] text-white hover:bg-[#e02020] transition-all duration-300 shadow-lg shadow-[#ff2a2a]/20 hover:scale-105 active:scale-95"
-              >
-                {heroContent.ctaPrimary.text}
-              </a>
+              {heroContent.ctaSecondary.text}
+            </a>
 
-              <a
-                href={heroContent.ctaSecondary.href}
-                className="px-7 py-3 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider bg-white/10 text-white hover:bg-white/20 border border-white/15 transition-all duration-300 hover:scale-105 active:scale-95"
-              >
-                {heroContent.ctaSecondary.text}
-              </a>
-
+            {/* Resume Download CTA (Render only if present) */}
+            {heroContent.ctaResume && heroContent.ctaResume.href && (
               <a
                 href={heroContent.ctaResume.href}
                 download
-                className="px-7 py-3 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider bg-transparent text-zinc-300 hover:text-white border border-white/20 hover:border-white transition-all duration-300"
+                className="px-6 py-3 rounded-full bg-transparent text-white font-semibold border border-white/50 hover:border-white hover:bg-white/10 transition-all text-xs md:text-sm uppercase tracking-wider flex items-center gap-2"
               >
-                {heroContent.ctaResume.text}
+                <svg
+                  className="w-4 h-4 fill-none stroke-current"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span>{heroContent.ctaResume.text}</span>
               </a>
-            </div>
-
-            {/* Social Links & Highlights */}
-            <div
-              data-aos="fade-up"
-              data-aos-delay="500"
-              className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-6 border-t border-white/10 text-zinc-400 text-xs sm:text-sm"
-            >
-              <div className="flex items-center gap-4">
-                <a
-                  href={socialLinks.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors flex items-center gap-1.5"
-                >
-                  <span>GitHub</span>
-                  <span className="text-[#ff2a2a]">↗</span>
-                </a>
-                <a
-                  href={socialLinks.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors flex items-center gap-1.5"
-                >
-                  <span>LinkedIn</span>
-                  <span className="text-[#ff2a2a]">↗</span>
-                </a>
-              </div>
-
-              <div className="hidden sm:block text-zinc-700">|</div>
-
-              <div className="text-zinc-400 text-xs">
-                Trained at <span className="text-zinc-200 font-semibold">{academy.name}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Floating Illustrated Portrait */}
-          <div
-            data-aos="fade-left"
-            data-aos-delay="200"
-            className="lg:col-span-5 flex justify-center"
-          >
-            <div className="relative animate-float">
-              {/* Decorative Red Backdrop Glow */}
-              <div className="absolute -inset-1 bg-gradient-to-tr from-[#ff2a2a] to-transparent rounded-3xl blur-lg opacity-40"></div>
-
-              {/* Portrait Container */}
-              <div className="relative rounded-2xl overflow-hidden border border-white/15 bg-zinc-950 shadow-2xl max-w-sm sm:max-w-md">
-                <img
-                  src={profileImg}
-                  alt={`${personalInfo.name} Illustrated Portrait`}
-                  className="w-full h-auto object-cover"
-                />
-
-                {/* Bottom Floating Tech Pill */}
-                <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-black/85 backdrop-blur-md border border-white/15 text-white flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-black tracking-wide text-white uppercase">
-                      {personalInfo.brandName}
-                    </p>
-                    <p className="text-[10px] text-[#ff2a2a] font-medium">
-                      Java • Spring Boot • MySQL
-                    </p>
-                  </div>
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#ff2a2a] animate-ping"></span>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
+
+        {/* Right Block: Play Reel Control */}
+        <div
+          data-aos="zoom-in"
+          data-aos-delay="600"
+          className="pointer-events-auto mt-6 md:mt-0 flex flex-col items-center"
+        >
+          <button
+            type="button"
+            onClick={toggleVideo}
+            aria-label={isPlaying ? 'Pause Reel' : 'Play Reel'}
+            className="w-12 h-12 md:w-20 md:h-20 rounded-full border border-white/30 bg-black/20 backdrop-blur flex items-center justify-center hover:scale-110 hover:bg-[#ff2a2a] hover:shadow-[0_0_25px_#ff2a2a] transition-all duration-300 text-white cursor-pointer"
+          >
+            {isPlaying ? (
+              /* Pause Icon */
+              <svg className="w-5 h-5 md:w-8 md:h-8 fill-current" viewBox="0 0 24 24">
+                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+              </svg>
+            ) : (
+              /* Play Triangle Icon */
+              <svg className="w-5 h-5 md:w-8 md:h-8 fill-current ml-0.5 md:ml-1" viewBox="0 0 24 24">
+                <path d="M5 3l14 9-14 9V3z" />
+              </svg>
+            )}
+          </button>
+          <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-white mt-2 select-none">
+            {isPlaying ? 'Pause' : 'Play Reel'}
+          </span>
+        </div>
+      </div>
+
+      {/* Bottom Center Bouncing Arrow Indicator */}
+      <div className="hidden md:block absolute bottom-6 left-1/2 -translate-x-1/2 z-20 animate-bounce pointer-events-none text-white">
+        <svg
+          className="w-6 h-6 stroke-current fill-none"
+          viewBox="0 0 24 24"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M7 13l5 5 5-5M12 4v14" />
+        </svg>
       </div>
     </section>
   )
