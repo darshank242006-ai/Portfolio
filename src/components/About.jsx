@@ -42,9 +42,9 @@ export default function About() {
               damping: 9,
               mass: 1.1,
             }}
-            className="relative flex flex-col items-center"
+            className="relative flex flex-col items-center w-[280px]"
           >
-            {/* Black lanyard string */}
+            {/* Black lanyard string extending above the badge */}
             <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-3 h-40 bg-black pointer-events-none" />
 
             {/* Grey clip rectangle */}
@@ -54,17 +54,27 @@ export default function About() {
             <button
               type="button"
               aria-label="Flip ID card"
-              onClick={() => setFlipped(!flipped)}
-              className="relative w-full max-w-[280px] -rotate-3 hover:rotate-0 transition-transform duration-500 [perspective:1200px] focus:outline-none cursor-pointer text-left"
+              onClick={() => setFlipped((prev) => !prev)}
+              className="relative w-[280px] h-[375px] max-w-[280px] -rotate-3 hover:rotate-0 transition-transform duration-500 [perspective:1200px] perspective-1200 focus:outline-none cursor-pointer text-left block select-none"
+              style={{ perspective: '1200px' }}
             >
               <div
-                className="relative w-full aspect-[3/4] transition-transform duration-700 [transform-style:preserve-3d]"
+                className="relative w-full h-full aspect-[3/4] transition-transform duration-700 [transform-style:preserve-3d] preserve-3d"
                 style={{
+                  transformStyle: 'preserve-3d',
+                  WebkitTransformStyle: 'preserve-3d',
                   transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                 }}
               >
                 {/* FRONT Face: ID Badge with Cutout Slot & Portrait */}
-                <div className="absolute inset-0 [backface-visibility:hidden] bg-gray-900 rounded-2xl p-3 shadow-2xl flex flex-col justify-between overflow-hidden">
+                <div
+                  className="absolute inset-0 [backface-visibility:hidden] backface-hidden bg-gray-900 rounded-2xl p-3 shadow-2xl flex flex-col justify-between"
+                  style={{
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
+                    transform: 'rotateY(0deg)',
+                  }}
+                >
                   <div className="w-10 h-1.5 bg-gray-700 rounded-full mx-auto mb-2 shrink-0" />
                   <img
                     src={stackImage}
@@ -74,11 +84,18 @@ export default function About() {
                 </div>
 
                 {/* BACK Face: Visiting Card */}
-                <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-[#141414] to-[#1f1f1f] rounded-2xl shadow-2xl overflow-hidden flex flex-col justify-between text-left text-white border border-white/10">
+                <div
+                  className="absolute inset-0 [backface-visibility:hidden] backface-hidden [transform:rotateY(180deg)] bg-gradient-to-br from-[#141414] to-[#1f1f1f] rounded-2xl shadow-2xl flex flex-col justify-between text-left text-white border border-white/10"
+                  style={{
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
+                    transform: 'rotateY(180deg)',
+                  }}
+                >
                   {/* 6px red bar across the top */}
-                  <div className="h-[6px] w-full bg-[#ff2a2a] shrink-0" />
+                  <div className="h-[6px] w-full bg-[#ff2a2a] rounded-t-2xl shrink-0" />
 
-                  <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                     <div>
                       {/* Brand Name */}
                       <h3 className="text-xl font-black text-white leading-tight">
@@ -218,14 +235,14 @@ export default function About() {
                     </div>
 
                     {/* QR Code and Caption at the bottom */}
-                    <div className="flex items-center gap-3 pt-3 border-t border-white/10 mt-3">
-                      <div className="bg-white rounded-lg p-2 shrink-0">
+                    <div className="flex items-center gap-3 pt-2.5 border-t border-white/10 mt-2">
+                      <div className="bg-white rounded-lg p-1.5 shrink-0">
                         <QRCode
                           value={
                             socialLinks.linkedin ||
                             'mailto:' + personalInfo.emails.primary
                           }
-                          size={76}
+                          size={72}
                         />
                       </div>
                       <span className="text-[10px] text-white/60 leading-tight">
